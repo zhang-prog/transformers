@@ -20,7 +20,7 @@ def get_image_features(model, processor, image_url):
     return image_feature_gap, image_feature_gmp
 
 if __name__ == "__main__":
-    model_path = "/home/zhangyue66/workspace/baidu/PaddleOCR-VL-1.5" # model repo id or model directory
+    model_path = "PaddlePaddle/PaddleOCR-VL-1.5" # model repo id or model directory
     model, processor = init_model_and_processor(model_path)
 
     image_url = "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/layout_demo.jpg"
