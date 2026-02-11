@@ -1241,10 +1241,23 @@ class PaddleOCRVLModel(PaddleOCRVLPreTrainedModel):
             **kwargs,
         )
         image_embeds = vision_outputs.last_hidden_state
-        image_embeds = self.projector(image_embeds, image_grid_thw)
-        vision_outputs.pooler_output = image_embeds
+        def minmax_01(v, fill_value=0.0):
+            v32 = v.to(torch.float32)
+            vmin = v32.amin(dim=-1, keepdim=True)
+            vmax = v32.amax(dim=-1, keepdim=True)
+            denom = vmax - vmin
+            vnorm32 = torch.where(denom > 0, (v32 - vmin) / denom, torch.full_like(v32, fill_value))
+            return vnorm32.to(v.dtype)
 
-        return vision_outputs
+        image_embeds = torch.nn.functional.avg_pool1d(image_embeds.unsqueeze(1), kernel_size=2, stride=2).squeeze(1)
+        image_feature_gap = minmax_01(image_embeds.mean(dim=0, keepdim=True))
+        image_feature_gmp = minmax_01(image_embeds.max(dim=0, keepdim=True).values)
+        return image_feature_gap, image_feature_gmp
+
+        # image_embeds = self.projector(image_embeds, image_grid_thw)
+        # vision_outputs.pooler_output = image_embeds
+
+        # return vision_outputs
 
     def get_placeholder_mask(
         self, input_ids: torch.LongTensor, inputs_embeds: torch.FloatTensor, image_features: torch.FloatTensor
