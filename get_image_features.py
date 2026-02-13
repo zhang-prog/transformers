@@ -6,7 +6,7 @@ from transformers import AutoProcessor, AutoModelForImageTextToText
 
 def init_model_and_processor(model_path):
     model = AutoModelForImageTextToText.from_pretrained(model_path, torch_dtype=torch.bfloat16).to("cuda").eval()
-    processor = AutoProcessor.from_pretrained(model_path)
+    processor = AutoProcessor.from_pretrained(model_path, use_fast=True)
 
     return model, processor
 
